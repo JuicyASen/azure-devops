@@ -32,6 +32,7 @@ var resourceCommonTags = {
 }
 
 var keyVaultSecretsUserRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
+var keyVaultDeploymentRole = 'Key Vault Deployment Access'
 
 // Project Identities
 resource webAppUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
@@ -65,6 +66,11 @@ module keyVaultModule 'module/keyvault.bicep' = {
       // Production Pipeline SP
       {
         role: keyVaultSecretsUserRole
+        principal: prdServicePrincipalId
+        principalType: 'ServicePrincipal'
+      }
+      {
+        role: keyVaultDeploymentRole
         principal: prdServicePrincipalId
         principalType: 'ServicePrincipal'
       }
