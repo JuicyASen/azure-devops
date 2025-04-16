@@ -16,6 +16,7 @@ param dotNetVersion string = 'DOTNETCORE|6.0'
 @description('Tags to assign to the resources.')
 param tags object = {}
 
+param webAppUAMI object
 param sqlServerName string 
 param sqlDatabasename string  
 
@@ -37,7 +38,10 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
   name: webAppName
   location: location
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${webAppUAMI.id}': {}
+    }
   }
   properties: {
     serverFarmId: appServicePlan.id
@@ -55,7 +59,7 @@ resource connectionString 'Microsoft.Web/sites/config@2022-03-01' = {
   properties: {
     DefaultConnection: {
       type: 'SQLAzure'
-      value: 'Server=tcp:${sqlServerName}${environment().suffixes.sqlServerHostname};Database=${sqlDatabasename};Authentication=Active Directory Managed Identity;Encrypt=True;TrustServerCertificate=False;'
+      value: 'Server=tcp:${sqlServerName}${environment().suffixes.sqlServerHostname}, 1433;Database=${sqlDatabasename};Authentication=Active Directory Default;'
     }
   }
 }

@@ -1,0 +1,45 @@
+on:
+  push:
+    branches:
+      - main
+    paths: 
+      - 'infra/production.*'
+  workflow_dispatch:
+name: Azure Bicep - Production
+
+# Required for OIDC token exchange
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: production
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Lastest
+      uses: actions/checkout@main
+
+    # Log into Azure
+    - name: Login with OIDC
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    # Deploy Bicep file
+    - name: Deployment
+      uses: azure/bicep-deploy@v2
+      with:
+        type: deploymentStack
+        operation: create
+        name: MPG-CrossCutting
+        scope: resourceGroup
+        action-on-unmanage-resources: delete
+        action-on-unmanage-resourcegroups: detach
+        deny-settings-mode: denyWriteAndDelete
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        resource-group-name: ${{ vars.AZURE_RG_PRD }}
+        parameters-file: ./infra/production.bicepparam
