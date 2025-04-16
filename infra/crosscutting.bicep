@@ -12,13 +12,17 @@ param app string = 'mpg'
 
 param utc_now string = utcNow('u')
 param adminPrincipalId string
+param prdServicePrincipalId string
+param webAppUAMIName string
+param keyVaultName string
 
 @secure()
 @description('The SQL Database password')
 param secret_sqldb_pswd string
 
-var suffix = '${app}-${env}-${loc}'
+var suffix = '${app}-${env}'
 var resourceCommonTags = {
+  resourceCode: '${suffix}-${loc}'
   createdBy: 'YC'
   managedBy: 'Bicep'
   location: location
@@ -31,7 +35,7 @@ var keyVaultSecretsUserRole = subscriptionResourceId('Microsoft.Authorization/ro
 
 // Project Identities
 resource webAppUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
-  name: 'uami-web-mpg-admin'
+  name: webAppUAMIName
   location: resourceGroup().location
   tags: union({usedBy: 'web-mpg-admin'}, resourceCommonTags)
 }
@@ -40,21 +44,29 @@ resource webAppUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30
 module keyVaultModule 'module/keyvault.bicep' = {
   name: 'keyVault'
   params: {
-    keyVaultName: 'kv-mpg-crs'
+    keyVaultName: keyVaultName
     tags: resourceCommonTags
     secrets: [
       { name: 'sqldbpswd', value: secret_sqldb_pswd }
     ]
     roleAssignments: [
+      // Admin User
       {
         role: keyVaultSecretsUserRole
         principal: adminPrincipalId
         principalType: 'User'
       }
+      // Web App UAMI
       {
         role: keyVaultSecretsUserRole
         principal: webAppUAMI.properties.principalId
         principalType: 'ServicePrincipal'
+      }
+      // Production Pipeline SP
+      {
+        role: keyVaultSecretsUserRole
+        principal: prdServicePrincipalId
+        pricipalType: 'ServicePrincipal'
       }
     ]
   }

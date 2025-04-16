@@ -20,7 +20,7 @@ jobs:
     - name: Login with OIDC
       uses: azure/login@v2
       with:
-        client-id: ${{ secrets.AZURE_IDENTITIES_CLIENT_ID }}
+        client-id: ${{ secrets.AZURE_CRS_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
@@ -32,7 +32,7 @@ jobs:
         operation: create
         name: MPG-CrossCutting
         scope: resourceGroup
-        action-on-unmanage-resources: detach
+        action-on-unmanage-resources: delete
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         resource-group-name: ${{ vars.AZURE_RG_CRS }}
         parameters-file: ./infra/crosscutting.bicepparam
