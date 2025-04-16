@@ -34,7 +34,7 @@ jobs:
         scope: resourceGroup
         action-on-unmanage-resources: delete
         action-on-unmanage-resourcegroups: detach
-        deny-settings-mode: denyWriteAndDelete
+        deny-settings-mode: denyDelete
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         resource-group-name: ${{ vars.AZURE_RG_CRS }}
         parameters-file: ./infra/crosscutting.bicepparam
