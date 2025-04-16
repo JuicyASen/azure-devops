@@ -66,7 +66,7 @@ module keyVaultModule 'module/keyvault.bicep' = {
       {
         role: keyVaultSecretsUserRole
         principal: prdServicePrincipalId
-        pricipalType: 'ServicePrincipal'
+        principalType: 'ServicePrincipal'
       }
     ]
   }
