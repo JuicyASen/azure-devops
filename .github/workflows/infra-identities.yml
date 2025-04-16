@@ -30,7 +30,7 @@ jobs:
       with:
         type: deployment
         operation: create
-        name: MPG Cross Cutting
+        name: MPG-CrossCutting
         scope: resourceGroup
         action-on-unmanage-resources: detach
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
