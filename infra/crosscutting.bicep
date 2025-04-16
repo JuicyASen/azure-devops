@@ -31,9 +31,9 @@ var keyVaultSecretsUserRole = subscriptionResourceId('Microsoft.Authorization/ro
 
 // Project Identities
 resource webAppUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
-  name: 'string'
+  name: 'uami-web-mpg-admin'
   location: resourceGroup().location
-  tags: union({usedBy: 'web-mpg'}, resourceCommonTags)
+  tags: union({usedBy: 'web-mpg-admin'}, resourceCommonTags)
 }
 
 // App KeyVault
