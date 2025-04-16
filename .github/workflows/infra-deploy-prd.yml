@@ -35,7 +35,7 @@ jobs:
       with:
         type: deploymentStack
         operation: create
-        name: MPG-CrossCutting
+        name: MPG-Production
         scope: resourceGroup
         action-on-unmanage-resources: delete
         action-on-unmanage-resourcegroups: detach
