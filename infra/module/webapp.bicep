@@ -16,7 +16,7 @@ param dotNetVersion string = 'DOTNETCORE|6.0'
 @description('Tags to assign to the resources.')
 param tags object = {}
 
-param webAppUAMI object
+param webAppUAMI string
 param sqlServerName string 
 param sqlDatabasename string  
 
@@ -40,7 +40,7 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
-      '${webAppUAMI.id}': {}
+      '${webAppUAMI}': {}
     }
   }
   properties: {
