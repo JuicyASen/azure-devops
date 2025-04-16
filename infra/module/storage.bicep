@@ -42,6 +42,10 @@ resource defaultBlob 'Microsoft.Storage/storageAccounts/blobServices@2024-01-01'
     cors: {
       corsRules: []
     }
+    containerDeleteRetentionPolicy: {
+      enabled: true
+      days: 7
+    }
     deleteRetentionPolicy: {
       allowPermanentDelete: false
       enabled: false
