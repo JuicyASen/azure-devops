@@ -1,0 +1,40 @@
+on:
+  push:
+    branches:
+      - main
+    paths: 
+      - 'infra/crosscutting.*'
+  workflow_dispatch:
+name: Azure Bicep - Cross Cutting
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Lastest
+      uses: actions/checkout@main
+
+    # Log into Azure
+    - name: Login with OIDC
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_IDENTITIES_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    # Deploy Bicep file
+    - name: Deployment
+      uses: azure/bicep-deploy@v2
+      with:
+        type: deployment
+        operation: create
+        name: MPG Cross Cutting
+        scope: resourceGroup
+        action-on-unmanage-resources: detach
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        resource-group-name: ${{ vars.AZURE_RG_CRS }}
+        parameters-file: ./infra/crosscutting.bicepparam
+      env:
+        SQL_DB_PASSWORD: ${{ secrets.MPG_ADMIN_DB_PASSWORD }}
