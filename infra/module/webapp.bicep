@@ -17,9 +17,11 @@ param dotNetVersion string = 'DOTNETCORE|9.0'
 param tags object = {}
 
 param webAppUAMIs array
-param sqlDBAccessUAMI object
 param sqlServerName string 
 param sqlDatabasename string
+
+param UAMIsqlDBAccessClientId string
+param UAMIKeyVaultAccessResourceId string
 
 var builtWebAppUAMIs = toObject(webAppUAMIs, uami => uami, _ => {})
 
@@ -45,6 +47,7 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
     userAssignedIdentities: builtWebAppUAMIs
   }
   properties: {
+    keyVaultReferenceIdentity: UAMIKeyVaultAccessResourceId
     serverFarmId: appServicePlan.id
     siteConfig: {
       linuxFxVersion: dotNetVersion
@@ -60,7 +63,7 @@ resource connectionString 'Microsoft.Web/sites/config@2022-03-01' = {
   properties: {
     DefaultConnection: {
       type: 'SQLAzure'
-      value: 'Server=${sqlServerName}${environment().suffixes.sqlServerHostname};Database=${sqlDatabasename};Authentication=Active Directory Managed Identity;User Id=${sqlDBAccessUAMI.properties.clientId};TrustServerCertificate=False'
+      value: 'Server=${sqlServerName}${environment().suffixes.sqlServerHostname};Database=${sqlDatabasename};Authentication=Active Directory Managed Identity;User Id=${UAMIsqlDBAccessClientId};TrustServerCertificate=False'
     }
   }
 }

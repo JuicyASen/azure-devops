@@ -14,8 +14,8 @@ param app string = 'mpg'
 param sqlUsername string = 'sqladmin'
 
 param crossCuttingRG string
-// param webAppUAMIName string
-param dbAccessUAMIName string
+param UAMIDBACName string
+param UAMIKeyVaultACName string
 param utc_now string = utcNow('u')
 param keyVaultName string = 'kv-${app}-crs-${loc}'
 param sqlPSWDSecretName string = 'sqldbpswd'
@@ -42,16 +42,16 @@ resource keyVault 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
   scope: resourceGroup(crossCuttingRG)
 }
 
+resource crsKVSecretsAccessUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: UAMIKeyVaultACName
+  scope: resourceGroup(crossCuttingRG)
+}
+
 resource dbAccessUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
-  name: dbAccessUAMIName
+  name: UAMIDBACName
   scope: resourceGroup()
   dependsOn: [sqlModule]
 }
-
-// resource webAppUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
-//   name: webAppUAMIName
-//   scope: resourceGroup(crossCuttingRG)
-// }
 
 module storageModule 'module/storage.bicep' = {
   name: 'storageModule'
@@ -71,7 +71,7 @@ module sqlModule 'module/sqldatabase.bicep' = {
     sqlServerName: sqlServerName
     administratorLogin: sqlUsername
     administratorPassword: keyVault.getSecret(sqlPSWDSecretName)
-    sqlDatabaseAccessUAMIName: dbAccessUAMIName
+    sqlDatabaseAccessUAMIName: UAMIDBACName
     databaseName: databaseName
     databaseEdition: 'Basic'
     databaseServiceObjective: 'Basic'
@@ -82,8 +82,9 @@ module sqlModule 'module/sqldatabase.bicep' = {
 module webappModule 'module/webapp.bicep' = {
   name: 'webappModule'
   params: {
-    webAppUAMIs: [dbAccessUAMI.id]
-    sqlDBAccessUAMI: dbAccessUAMI
+    webAppUAMIs: [dbAccessUAMI.id, crsKVSecretsAccessUAMI.id]
+    UAMIsqlDBAccessClientId: dbAccessUAMI.properties.clientId
+    UAMIKeyVaultAccessResourceId: crsKVSecretsAccessUAMI.id
     sqlServerName: sqlServerName
     sqlDatabasename: databaseName
     appServicePlanName: appServicePlanName
