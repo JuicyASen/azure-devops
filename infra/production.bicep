@@ -42,6 +42,12 @@ resource keyVault 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
   scope: resourceGroup(crossCuttingRG)
 }
 
+resource dbAccessUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: dbAccessUAMIName
+  scope: resourceGroup()
+  dependsOn: [sqlModule]
+}
+
 // resource webAppUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
 //   name: webAppUAMIName
 //   scope: resourceGroup(crossCuttingRG)
@@ -76,8 +82,8 @@ module sqlModule 'module/sqldatabase.bicep' = {
 module webappModule 'module/webapp.bicep' = {
   name: 'webappModule'
   params: {
-    webAppUAMIs: [sqlModule.outputs.sqlDBAccessUAMI]
-    sqlDBAccessUAMI: sqlModule.outputs.sqlDBAccessUAMI
+    webAppUAMIs: [dbAccessUAMI]
+    sqlDBAccessUAMI: dbAccessUAMI
     sqlServerName: sqlServerName
     sqlDatabasename: databaseName
     appServicePlanName: appServicePlanName
