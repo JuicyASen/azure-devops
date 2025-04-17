@@ -20,6 +20,9 @@ param utc_now string = utcNow('u')
 param keyVaultName string = 'kv-${app}-crs-${loc}'
 param sqlPSWDSecretName string = 'sqldbpswd'
 
+param DBAGroupName string
+param DBAGroupObjId string
+
 var suffix = '${app}-${env}'
 var storageAccountName = 'st${app}${env}${loc}'
 var appServicePlanName = 'asp-${suffix}'
@@ -76,6 +79,10 @@ module sqlModule 'module/sqldatabase.bicep' = {
     databaseEdition: 'Basic'
     databaseServiceObjective: 'Basic'
     tags: resourceCommonTags
+    // Entra Admin Setting
+    entraAdminName: DBAGroupName
+    entraAdminObjId: DBAGroupObjId
+    entraAdminTenantId: tenant().tenantId
   }
 }
 

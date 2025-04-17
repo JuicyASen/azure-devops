@@ -26,6 +26,15 @@ param location string = resourceGroup().location
 @description('Tags to assign to the resources.')
 param tags object = {}
 
+@description('The Entra Admin Login name')
+param entraAdminName string
+
+@description('The Entra Admin Object ID')
+param entraAdminObjId string
+
+@description('The Entra Admin Tenant ID')
+param entraAdminTenantId string
+
 resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
   name: sqlServerName
   location: location
@@ -35,6 +44,17 @@ resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
     
   }
   tags: tags
+}
+
+resource sqlAdmin 'Microsoft.Sql/servers/administrators@2024-05-01-preview' = {
+  parent: sqlServer
+  name: 'string'
+  properties: {
+    administratorType: 'ActiveDirectory'
+    login: entraAdminName
+    sid: entraAdminObjId
+    tenantId: entraAdminTenantId
+  }
 }
 
 resource allowAzureServicesFirewallRule 'Microsoft.Sql/servers/firewallRules@2023-08-01-preview' = {
