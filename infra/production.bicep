@@ -14,7 +14,8 @@ param app string = 'mpg'
 param sqlUsername string = 'sqladmin'
 
 param crossCuttingRG string
-param webAppUAMIName string
+// param webAppUAMIName string
+param dbAccessUAMIName string
 param utc_now string = utcNow('u')
 param keyVaultName string = 'kv-${app}-crs-${loc}'
 param sqlPSWDSecretName string = 'sqldbpswd'
@@ -41,10 +42,10 @@ resource keyVault 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
   scope: resourceGroup(crossCuttingRG)
 }
 
-resource webAppUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
-  name: webAppUAMIName
-  scope: resourceGroup(crossCuttingRG)
-}
+// resource webAppUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+//   name: webAppUAMIName
+//   scope: resourceGroup(crossCuttingRG)
+// }
 
 module storageModule 'module/storage.bicep' = {
   name: 'storageModule'
@@ -64,6 +65,7 @@ module sqlModule 'module/sqldatabase.bicep' = {
     sqlServerName: sqlServerName
     administratorLogin: sqlUsername
     administratorPassword: keyVault.getSecret(sqlPSWDSecretName)
+    sqlDatabaseAccessUAMIName: dbAccessUAMIName
     databaseName: databaseName
     databaseEdition: 'Basic'
     databaseServiceObjective: 'Basic'
@@ -74,7 +76,8 @@ module sqlModule 'module/sqldatabase.bicep' = {
 module webappModule 'module/webapp.bicep' = {
   name: 'webappModule'
   params: {
-    webAppUAMI: webAppUAMI.id
+    webAppUAMIs: [sqlModule.outputs.sqlDBAccessUAMI]
+    sqlDBAccessUAMI: sqlModule.outputs.sqlDBAccessUAMI
     sqlServerName: sqlServerName
     sqlDatabasename: databaseName
     appServicePlanName: appServicePlanName

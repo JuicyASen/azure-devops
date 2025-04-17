@@ -4,6 +4,9 @@ param sqlServerName string
 @description('The administrator username for the SQL Server.')
 param administratorLogin string
 
+@description('The UAMI for db access')
+param sqlDatabaseAccessUAMIName string
+
 @secure()
 @description('The administrator password for the SQL Server.')
 param administratorPassword string
@@ -54,5 +57,12 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2023-08-01-preview' = {
   tags: tags
 }
 
+resource sqlDatabaseAccessUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  name: sqlDatabaseAccessUAMIName
+  location: resourceGroup().location
+  tags: union({usedFor: 'SQLDatabase ${sqlServerName}/${databaseName}'}, tags)
+}
+
 output sqlServerFqdn string = sqlServer.properties.fullyQualifiedDomainName
+output sqlDBAccessUAMI object = sqlDatabaseAccessUAMI
 output sqlDatabaseName string = sqlDatabase.name

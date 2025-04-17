@@ -11,14 +11,17 @@ param skuName string = 'B1'
 param location string = resourceGroup().location
 
 @description('The version of the .NET runtime stack.')
-param dotNetVersion string = 'DOTNETCORE|6.0'
+param dotNetVersion string = 'DOTNETCORE|9.0'
 
 @description('Tags to assign to the resources.')
 param tags object = {}
 
-param webAppUAMI string
+param webAppUAMIs array
+param sqlDBAccessUAMI object
 param sqlServerName string 
-param sqlDatabasename string  
+param sqlDatabasename string
+
+var builtWebAppUAMIs = toObject(webAppUAMIs, uami => uami.id, e => {})
 
 resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
   name: appServicePlanName
@@ -39,9 +42,7 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
   location: location
   identity: {
     type: 'UserAssigned'
-    userAssignedIdentities: {
-      '${webAppUAMI}': {}
-    }
+    userAssignedIdentities: builtWebAppUAMIs
   }
   properties: {
     serverFarmId: appServicePlan.id
@@ -59,7 +60,7 @@ resource connectionString 'Microsoft.Web/sites/config@2022-03-01' = {
   properties: {
     DefaultConnection: {
       type: 'SQLAzure'
-      value: 'Server=tcp:${sqlServerName}${environment().suffixes.sqlServerHostname}, 1433;Database=${sqlDatabasename};Authentication=Active Directory Default;'
+      value: 'Server=${sqlServerName}${environment().suffixes.sqlServerHostname};Database=${sqlDatabasename};Authentication=Active Directory Managed Identity;User Id=${sqlDBAccessUAMI.properties.clientId};TrustServerCertificate=False'
     }
   }
 }
