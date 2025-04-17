@@ -46,9 +46,9 @@ resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
   tags: tags
 }
 
-resource sqlAdmin 'Microsoft.Sql/servers/administrators@2024-05-01-preview' = {
+resource sqlAdmin 'Microsoft.Sql/servers/administrators@2023-08-01-preview' = {
   parent: sqlServer
-  name: 'string'
+  name: 'ActiveDirectory'
   properties: {
     administratorType: 'ActiveDirectory'
     login: entraAdminName
