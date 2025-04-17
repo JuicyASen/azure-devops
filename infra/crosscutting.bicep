@@ -13,7 +13,7 @@ param app string = 'mpg'
 param utc_now string = utcNow('u')
 param adminPrincipalId string
 param prdServicePrincipalId string
-param webAppUAMIName string
+param keyVaultAccessUAMIName string
 param keyVaultName string
 
 @secure()
@@ -35,10 +35,10 @@ var keyVaultSecretsUserRole = subscriptionResourceId('Microsoft.Authorization/ro
 var keyVaultDeploymentRole = 'Key Vault Deployment Access'
 
 // Project Identities
-resource webAppUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
-  name: webAppUAMIName
+resource keyVaultAccessUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  name: keyVaultAccessUAMIName
   location: resourceGroup().location
-  tags: union({usedBy: 'web-mpg-admin'}, resourceCommonTags)
+  tags: union({usedFor: 'KeyVault ${keyVaultName}'}, resourceCommonTags)
 }
 
 // App KeyVault
@@ -60,7 +60,7 @@ module keyVaultModule 'module/keyvault.bicep' = {
       // Web App UAMI
       {
         role: keyVaultSecretsUserRole
-        principal: webAppUAMI.properties.principalId
+        principal: keyVaultAccessUAMI.properties.principalId
         principalType: 'ServicePrincipal'
       }
       // Production Pipeline SP
