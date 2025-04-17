@@ -82,7 +82,7 @@ module sqlModule 'module/sqldatabase.bicep' = {
 module webappModule 'module/webapp.bicep' = {
   name: 'webappModule'
   params: {
-    webAppUAMIs: [dbAccessUAMI]
+    webAppUAMIs: [dbAccessUAMI.id]
     sqlDBAccessUAMI: dbAccessUAMI
     sqlServerName: sqlServerName
     sqlDatabasename: databaseName

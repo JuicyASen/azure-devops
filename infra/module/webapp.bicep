@@ -21,7 +21,7 @@ param sqlDBAccessUAMI object
 param sqlServerName string 
 param sqlDatabasename string
 
-var builtWebAppUAMIs = toObject(webAppUAMIs, uami => uami.id, e => {})
+var builtWebAppUAMIs = toObject(webAppUAMIs, uami => uami, _ => {})
 
 resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
   name: appServicePlanName

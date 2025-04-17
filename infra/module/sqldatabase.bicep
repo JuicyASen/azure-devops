@@ -57,6 +57,7 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2023-08-01-preview' = {
   tags: tags
 }
 
+// This does not guarrantee access to database create user and grant permission in sql server for this UAMI manually
 resource sqlDatabaseAccessUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
   name: sqlDatabaseAccessUAMIName
   location: resourceGroup().location
@@ -64,5 +65,4 @@ resource sqlDatabaseAccessUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities
 }
 
 output sqlServerFqdn string = sqlServer.properties.fullyQualifiedDomainName
-output sqlDBAccessUAMI object = sqlDatabaseAccessUAMI
 output sqlDatabaseName string = sqlDatabase.name
